@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Disable Carrier Popup</string>
+
+    <string name="xposed_description">A module to disable STK dialog</string>
+</resources>
