@@ -1,25 +1,32 @@
 package com.zhangfx.xposed.disablecarrierpopup;
 
 import android.content.Intent;
+import android.os.SystemClock;
 
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.XC_MethodHook;
+import de.robv.android.xposed.XposedBridge;
+import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
-
-import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;
 
 public class XposedMod implements IXposedHookLoadPackage {
 
     @Override
-    public void handleLoadPackage(XC_LoadPackage.LoadPackageParam loadPackageParam) throws Throwable {
-        if (!loadPackageParam.packageName.contains("com.android.stk")) {
+    public void handleLoadPackage(final XC_LoadPackage.LoadPackageParam loadPackageParam) throws Throwable {
+        if (!loadPackageParam.packageName.equals("com.android.stk")) {
             return;
         }
 
-        findAndHookMethod("com.android.stk.StkDialogActivity", loadPackageParam.classLoader, "initFromIntent", Intent.class, new XC_MethodHook() {
+        XposedHelpers.findAndHookMethod("com.android.stk.StkDialogActivity", loadPackageParam.classLoader, "initFromIntent", Intent.class, new XC_MethodHook() {
             @Override
             protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-                param.args[0] = null;
+                if (SystemClock.elapsedRealtime() > 1000 * 60 * 5) {
+                    XposedBridge.log(loadPackageParam.packageName + ": dialog enabled");
+                } else {
+                    XposedBridge.log(loadPackageParam.packageName + ": dialog disabled");
+
+                    param.args[0] = null;
+                }
             }
         });
     }
